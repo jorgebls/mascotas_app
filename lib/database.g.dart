@@ -57,8 +57,19 @@ class $MascotasTable extends Mascotas with TableInfo<$MascotasTable, Mascota> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _vacunasMeta = const VerificationMeta(
+    'vacunas',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, nombre, tipo, peso, edad];
+  late final GeneratedColumn<String> vacunas = GeneratedColumn<String>(
+    'vacunas',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, nombre, tipo, peso, edad, vacunas];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -106,6 +117,14 @@ class $MascotasTable extends Mascotas with TableInfo<$MascotasTable, Mascota> {
     } else if (isInserting) {
       context.missing(_edadMeta);
     }
+    if (data.containsKey('vacunas')) {
+      context.handle(
+        _vacunasMeta,
+        vacunas.isAcceptableOrUnknown(data['vacunas']!, _vacunasMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_vacunasMeta);
+    }
     return context;
   }
 
@@ -135,6 +154,10 @@ class $MascotasTable extends Mascotas with TableInfo<$MascotasTable, Mascota> {
         DriftSqlType.int,
         data['${effectivePrefix}edad'],
       )!,
+      vacunas: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vacunas'],
+      )!,
     );
   }
 
@@ -150,12 +173,14 @@ class Mascota extends DataClass implements Insertable<Mascota> {
   final String tipo;
   final double peso;
   final int edad;
+  final String vacunas;
   const Mascota({
     required this.id,
     required this.nombre,
     required this.tipo,
     required this.peso,
     required this.edad,
+    required this.vacunas,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -165,6 +190,7 @@ class Mascota extends DataClass implements Insertable<Mascota> {
     map['tipo'] = Variable<String>(tipo);
     map['peso'] = Variable<double>(peso);
     map['edad'] = Variable<int>(edad);
+    map['vacunas'] = Variable<String>(vacunas);
     return map;
   }
 
@@ -175,6 +201,7 @@ class Mascota extends DataClass implements Insertable<Mascota> {
       tipo: Value(tipo),
       peso: Value(peso),
       edad: Value(edad),
+      vacunas: Value(vacunas),
     );
   }
 
@@ -189,6 +216,7 @@ class Mascota extends DataClass implements Insertable<Mascota> {
       tipo: serializer.fromJson<String>(json['tipo']),
       peso: serializer.fromJson<double>(json['peso']),
       edad: serializer.fromJson<int>(json['edad']),
+      vacunas: serializer.fromJson<String>(json['vacunas']),
     );
   }
   @override
@@ -200,6 +228,7 @@ class Mascota extends DataClass implements Insertable<Mascota> {
       'tipo': serializer.toJson<String>(tipo),
       'peso': serializer.toJson<double>(peso),
       'edad': serializer.toJson<int>(edad),
+      'vacunas': serializer.toJson<String>(vacunas),
     };
   }
 
@@ -209,12 +238,14 @@ class Mascota extends DataClass implements Insertable<Mascota> {
     String? tipo,
     double? peso,
     int? edad,
+    String? vacunas,
   }) => Mascota(
     id: id ?? this.id,
     nombre: nombre ?? this.nombre,
     tipo: tipo ?? this.tipo,
     peso: peso ?? this.peso,
     edad: edad ?? this.edad,
+    vacunas: vacunas ?? this.vacunas,
   );
   Mascota copyWithCompanion(MascotasCompanion data) {
     return Mascota(
@@ -223,6 +254,7 @@ class Mascota extends DataClass implements Insertable<Mascota> {
       tipo: data.tipo.present ? data.tipo.value : this.tipo,
       peso: data.peso.present ? data.peso.value : this.peso,
       edad: data.edad.present ? data.edad.value : this.edad,
+      vacunas: data.vacunas.present ? data.vacunas.value : this.vacunas,
     );
   }
 
@@ -233,13 +265,14 @@ class Mascota extends DataClass implements Insertable<Mascota> {
           ..write('nombre: $nombre, ')
           ..write('tipo: $tipo, ')
           ..write('peso: $peso, ')
-          ..write('edad: $edad')
+          ..write('edad: $edad, ')
+          ..write('vacunas: $vacunas')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nombre, tipo, peso, edad);
+  int get hashCode => Object.hash(id, nombre, tipo, peso, edad, vacunas);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -248,7 +281,8 @@ class Mascota extends DataClass implements Insertable<Mascota> {
           other.nombre == this.nombre &&
           other.tipo == this.tipo &&
           other.peso == this.peso &&
-          other.edad == this.edad);
+          other.edad == this.edad &&
+          other.vacunas == this.vacunas);
 }
 
 class MascotasCompanion extends UpdateCompanion<Mascota> {
@@ -257,12 +291,14 @@ class MascotasCompanion extends UpdateCompanion<Mascota> {
   final Value<String> tipo;
   final Value<double> peso;
   final Value<int> edad;
+  final Value<String> vacunas;
   const MascotasCompanion({
     this.id = const Value.absent(),
     this.nombre = const Value.absent(),
     this.tipo = const Value.absent(),
     this.peso = const Value.absent(),
     this.edad = const Value.absent(),
+    this.vacunas = const Value.absent(),
   });
   MascotasCompanion.insert({
     this.id = const Value.absent(),
@@ -270,16 +306,19 @@ class MascotasCompanion extends UpdateCompanion<Mascota> {
     required String tipo,
     required double peso,
     required int edad,
+    required String vacunas,
   }) : nombre = Value(nombre),
        tipo = Value(tipo),
        peso = Value(peso),
-       edad = Value(edad);
+       edad = Value(edad),
+       vacunas = Value(vacunas);
   static Insertable<Mascota> custom({
     Expression<int>? id,
     Expression<String>? nombre,
     Expression<String>? tipo,
     Expression<double>? peso,
     Expression<int>? edad,
+    Expression<String>? vacunas,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -287,6 +326,7 @@ class MascotasCompanion extends UpdateCompanion<Mascota> {
       if (tipo != null) 'tipo': tipo,
       if (peso != null) 'peso': peso,
       if (edad != null) 'edad': edad,
+      if (vacunas != null) 'vacunas': vacunas,
     });
   }
 
@@ -296,6 +336,7 @@ class MascotasCompanion extends UpdateCompanion<Mascota> {
     Value<String>? tipo,
     Value<double>? peso,
     Value<int>? edad,
+    Value<String>? vacunas,
   }) {
     return MascotasCompanion(
       id: id ?? this.id,
@@ -303,6 +344,7 @@ class MascotasCompanion extends UpdateCompanion<Mascota> {
       tipo: tipo ?? this.tipo,
       peso: peso ?? this.peso,
       edad: edad ?? this.edad,
+      vacunas: vacunas ?? this.vacunas,
     );
   }
 
@@ -324,6 +366,9 @@ class MascotasCompanion extends UpdateCompanion<Mascota> {
     if (edad.present) {
       map['edad'] = Variable<int>(edad.value);
     }
+    if (vacunas.present) {
+      map['vacunas'] = Variable<String>(vacunas.value);
+    }
     return map;
   }
 
@@ -334,7 +379,8 @@ class MascotasCompanion extends UpdateCompanion<Mascota> {
           ..write('nombre: $nombre, ')
           ..write('tipo: $tipo, ')
           ..write('peso: $peso, ')
-          ..write('edad: $edad')
+          ..write('edad: $edad, ')
+          ..write('vacunas: $vacunas')
           ..write(')'))
         .toString();
   }
@@ -358,6 +404,7 @@ typedef $$MascotasTableCreateCompanionBuilder =
       required String tipo,
       required double peso,
       required int edad,
+      required String vacunas,
     });
 typedef $$MascotasTableUpdateCompanionBuilder =
     MascotasCompanion Function({
@@ -366,6 +413,7 @@ typedef $$MascotasTableUpdateCompanionBuilder =
       Value<String> tipo,
       Value<double> peso,
       Value<int> edad,
+      Value<String> vacunas,
     });
 
 class $$MascotasTableFilterComposer
@@ -399,6 +447,11 @@ class $$MascotasTableFilterComposer
 
   ColumnFilters<int> get edad => $composableBuilder(
     column: $table.edad,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vacunas => $composableBuilder(
+    column: $table.vacunas,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -436,6 +489,11 @@ class $$MascotasTableOrderingComposer
     column: $table.edad,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get vacunas => $composableBuilder(
+    column: $table.vacunas,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MascotasTableAnnotationComposer
@@ -461,6 +519,9 @@ class $$MascotasTableAnnotationComposer
 
   GeneratedColumn<int> get edad =>
       $composableBuilder(column: $table.edad, builder: (column) => column);
+
+  GeneratedColumn<String> get vacunas =>
+      $composableBuilder(column: $table.vacunas, builder: (column) => column);
 }
 
 class $$MascotasTableTableManager
@@ -496,12 +557,14 @@ class $$MascotasTableTableManager
                 Value<String> tipo = const Value.absent(),
                 Value<double> peso = const Value.absent(),
                 Value<int> edad = const Value.absent(),
+                Value<String> vacunas = const Value.absent(),
               }) => MascotasCompanion(
                 id: id,
                 nombre: nombre,
                 tipo: tipo,
                 peso: peso,
                 edad: edad,
+                vacunas: vacunas,
               ),
           createCompanionCallback:
               ({
@@ -510,12 +573,14 @@ class $$MascotasTableTableManager
                 required String tipo,
                 required double peso,
                 required int edad,
+                required String vacunas,
               }) => MascotasCompanion.insert(
                 id: id,
                 nombre: nombre,
                 tipo: tipo,
                 peso: peso,
                 edad: edad,
+                vacunas: vacunas,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
