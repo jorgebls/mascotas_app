@@ -19,11 +19,9 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 2;
 
-  // --- ¡AQUÍ ESTÁN LAS FUNCIONES! ---
   Future<int> insertarMascota(MascotasCompanion mascota) =>
       into(mascotas).insert(mascota);
 
-  // ESTA ES LA LÍNEA QUE FALTABA PARA QUE SE QUITE EL ERROR ROJO:
   Future<bool> actualizarMascota(Mascota mascota) =>
       update(mascotas).replace(mascota);
 
